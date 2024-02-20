@@ -191,7 +191,7 @@ class HeatmapGenerator:
         TICK_STEP = 4  # Step for the tick marks on the x-axis
         TICK_FONT_SIZE = 6  # Font size for tick labels
         TITLE_FONT_SIZE = 10  # Font size for the plot title
-        LABEL_FONT_SIZE = 6  # Font size for axis labels
+        LABEL_FONT_SIZE = 8  # Font size for axis labels
         COLOR_BAR_FONT_SIZE = 6  # Font size for color bar labels
         COLOR_BAR_LABEL = 'Reference match probability'  # Label for the color bar
 
