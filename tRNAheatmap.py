@@ -167,7 +167,8 @@ class HeatmapGenerator:
             posteriors = pp_dict[tRNA]
             # Check for errors in data length
             if len(posteriors) > self.tRNA_max_length:
-                print('Error: The length of', tRNA, 'is longer than max length given.')
+                print('Error: The length of', tRNA, 'is longer than max length given. You may not have filtered out '
+                                                    'secondary and/or supplementary alignments.')
                 print(tRNA, len(posteriors))
             elif len(posteriors) < self.tRNA_max_length:
                 # Pad the list with None values to match the max length
