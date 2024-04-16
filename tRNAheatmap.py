@@ -63,9 +63,17 @@ class HeatmapGenerator:
         as the anticodon. If the input sequence has fewer than 3 characters, it returns None."""
 
         if len(trna) >= 3:
-            anticodon = trna[-3:]
-            # join amino acid identity with reverse translated anti-codon
-            translated_ac = trna[:-3] + anticodon.replace("U", "T")
+            if not re.search(r'\d', trna[-3:]):
+                anticodon = trna[-3:]
+                # join amino acid identity with reverse translated anti-codon
+                translated_ac = trna[:-3] + anticodon.replace("U", "T")
+            else:
+                anticodon = trna[-7:].split('-')[0]
+                if 'iMet' in trna:
+                    translated_ac = trna[:len(trna) - 7] + anticodon.replace("U", "T") + trna[-4:]
+                else:
+                    translated_ac = trna[:len(trna)-7] + '-' + anticodon.replace("U", "T") + trna[-4:]
+                    
             return translated_ac
 
     def TtoU(self, lbl):
