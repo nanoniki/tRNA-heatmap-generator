@@ -198,7 +198,8 @@ class HeatmapGenerator:
         FIG_WIDTH_CM = 18  # Width of the figure in centimeters
         FIG_HEIGHT_CM = 12  # Height of the figure in centimeters
         TICK_STEP = 4  # Step for the tick marks on the x-axis
-        TICK_FONT_SIZE = 6  # Font size for tick labels
+        X_TICK_FONT_SIZE = 6  # Font size for xtick labels
+        Y_TICK_FONT_SIZE = 4  # Font size for ytick labels
         TITLE_FONT_SIZE = 10  # Font size for the plot title
         LABEL_FONT_SIZE = 8  # Font size for axis labels
         COLOR_BAR_FONT_SIZE = 6  # Font size for color bar labels
@@ -231,10 +232,10 @@ class HeatmapGenerator:
         ax.set_yticks(np.arange(len(noT_labels)), labels=noT_labels)
 
         # Set font size and alignment for x-axis tick labels
-        plt.setp(ax.get_xticklabels(), fontsize=TICK_FONT_SIZE, ha="center", rotation_mode="anchor")
+        plt.setp(ax.get_xticklabels(), fontsize=X_TICK_FONT_SIZE, ha="center", rotation_mode="anchor")
 
         # Set font size for y-axis tick labels
-        plt.setp(ax.get_yticklabels(), fontsize=TICK_FONT_SIZE)
+        plt.setp(ax.get_yticklabels(), fontsize=Y_TICK_FONT_SIZE)
 
         # Set plot title
         ax.set_title(self.title, fontsize=TITLE_FONT_SIZE, pad=7)
