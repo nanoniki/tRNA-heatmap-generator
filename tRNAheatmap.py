@@ -3,6 +3,7 @@ import argparse
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
+import re
 
 
 class HeatmapGenerator:
