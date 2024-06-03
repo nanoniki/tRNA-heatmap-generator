@@ -3,14 +3,25 @@ import argparse
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
+import ast
 import re
 
+import matplotlib as mpl
+import matplotlib.colors as colors
+from matplotlib.patches import Rectangle
+from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.gridspec import GridSpec
+from matplotlib.ticker import MultipleLocator
+plt.rcParams['pdf.fonttype'] = 42
+plt.switch_backend('agg')
 
 class HeatmapGenerator:
-    def __init__(self, input_file, output_file, lengths_file, adaptors, title, resolution, difference, bidirectional):
+    def __init__(self, input_file, output_file, lengths_file, adaptors, title, resolution, difference, bidirectional,
+                 structure):
         self.input_file = input_file
         self.output_file = output_file
         self.lengths_file = lengths_file
+        self.structure_file = structure
         self.adaptors = [int(adaptors.split(',')[0]), int(adaptors.split(',')[1])]
         self.title = title
         self.difference = difference
@@ -18,6 +29,7 @@ class HeatmapGenerator:
         self.resolution = resolution
 
         self.tRNA_lengths = {}
+        self.tRNA_structure = {}
         self.tRNA_labels = []  # labels for y-axis
         self.clean_labels = []
         self.tRNA_count = 0  # the number of tRNAs
@@ -42,7 +54,10 @@ class HeatmapGenerator:
         max_length_adjusted = max(self.tRNA_lengths.values()) - sum(self.adaptors)
 
         # Update the maximum length attribute
-        self.tRNA_max_length = max_length_adjusted
+        if self.structure_file:
+            self.tRNA_max_length = max_length_adjusted + 4  # +4 to account for -1, 20a, 20b, etc
+        else:
+            self.tRNA_max_length = max_length_adjusted
 
         # If any tRNA length is less than the sum of adaptors, adjust it to 0
         for tRNA, length in self.tRNA_lengths.items():
@@ -58,11 +73,31 @@ class HeatmapGenerator:
         # Update the tRNA count based on the filtered tRNA labels
         self.tRNA_count = len(self.tRNA_labels)
 
+    def load_structure(self):
+
+        with open(self.structure_file, 'r') as f:
+            # Skip the header
+            next(f)
+            for line in f:
+                tRNA = line.strip().split('\t')[0]
+                v_loop = int(line.strip().split('\t')[-1])
+
+                elements = line.strip().split('\t')[1:-1]
+                other_v = []
+                for e in elements:
+                    if e.startswith('(') and e.endswith(')'):
+                        other_v.append(ast.literal_eval(e))
+
+                coordinates = other_v + [v_loop]
+
+                self.tRNA_structure[tRNA] = coordinates
+
+        # print('\n'.join(f'{k}: {v}' for k, v in self.tRNA_structure.items()))
+
     def UtoT(self, trna):
         """This function takes a tRNA sequence as input and replaces 'U' nucleotides in the anticodon
         region with 'T'. It specifically targets the last three characters of the input sequence
         as the anticodon. If the input sequence has fewer than 3 characters, it returns None."""
-
         if len(trna) >= 3:
             if not re.search(r'\d', trna[-3:]):
                 anticodon = trna[-3:]
@@ -73,8 +108,8 @@ class HeatmapGenerator:
                 if 'iMet' in trna:
                     translated_ac = trna[:len(trna) - 7] + anticodon.replace("U", "T") + trna[-4:]
                 else:
-                    translated_ac = trna[:len(trna)-7] + '-' + anticodon.replace("U", "T") + trna[-4:]
-                    
+                    translated_ac = trna[:len(trna) - 7] + '-' + anticodon.replace("U", "T") + trna[-4:]
+
             return translated_ac
 
     def TtoU(self, lbl):
@@ -174,14 +209,35 @@ class HeatmapGenerator:
         # Fill in posterior probability matrix with data from pp_dict
         for i, tRNA in enumerate(self.tRNA_labels):
             posteriors = pp_dict[tRNA]
+
+            nan_tuples = self.tRNA_structure[tRNA][:-1]
+            for coord, count in nan_tuples:
+                # print(tRNA, coord, count)
+                nan_values = [np.nan for _ in range(count)]
+                posteriors[coord:coord] = nan_values
+                # posteriors.insert(coord, (np.nan * count))
+
+            tRNA_len_noA = pos_dict[tRNA][-1] + len(self.tRNA_structure[tRNA][:-1])  # tRNA length no adaptor
+            var_loop_len = abs(self.tRNA_max_length - tRNA_len_noA) - (sum(y for _, y in nan_tuples) - len(nan_tuples))
+
+            var_loop_start = (self.tRNA_structure[tRNA][-1] - self.adaptors[0] - 1)  # variable loop start position
+
             # Check for errors in data length
             if len(posteriors) > self.tRNA_max_length:
                 print('Error: The length of', tRNA, 'is longer than max length given. You may not have filtered out '
                                                     'secondary and/or supplementary alignments.')
+                # check TyrGTA GluCTC or iMet labels and dictionary keys
                 print(tRNA, len(posteriors))
+                print(posteriors)
+
             elif len(posteriors) < self.tRNA_max_length:
-                # Pad the list with None values to match the max length
-                posteriors.extend([None] * (self.tRNA_max_length - len(posteriors)))
+
+                if self.structure_file:
+                    # Insert None for each position of the variable loop
+                    posteriors[var_loop_start:var_loop_start] = [np.nan] * var_loop_len
+                else:
+                    # Pad the list with None values to match the max length
+                    posteriors.extend([None] * (self.tRNA_max_length - len(posteriors)))
 
             # Fill in posterior probability matrix row
             posterior_prob[i, :] = posteriors[::-1]  # Reverse the list to match positions
@@ -199,12 +255,22 @@ class HeatmapGenerator:
         FIG_WIDTH_CM = 18  # Width of the figure in centimeters
         FIG_HEIGHT_CM = 12  # Height of the figure in centimeters
         TICK_STEP = 4  # Step for the tick marks on the x-axis
-        X_TICK_FONT_SIZE = 6  # Font size for xtick labels
+        if self.structure_file:
+            X_TICK_FONT_SIZE = 4  # Font size for xtick labels in structured heatmap
+        else:
+            X_TICK_FONT_SIZE = 6  # Font size for xtick labels in regular heatmap
         Y_TICK_FONT_SIZE = 4  # Font size for ytick labels
         TITLE_FONT_SIZE = 10  # Font size for the plot title
-        LABEL_FONT_SIZE = 8  # Font size for axis labels
+        LABEL_FONT_SIZE = 6  # Font size for axis labels
         COLOR_BAR_FONT_SIZE = 6  # Font size for color bar labels
         COLOR_BAR_LABEL = 'Reference match probability'  # Label for the color bar
+
+        yeast_structure_xticks = ['-1 ', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
+                            '16', '17', '18', '19', '20', '20a ', '20b ', '21', '22', '23', '24', '25', '26', '27',
+                            '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42',
+                            '43', '44', '45', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', '46', '47',
+                            '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62',
+                            '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76']
 
         # Convert centimeters to inches
         cm = 1 / 2.54
@@ -214,8 +280,12 @@ class HeatmapGenerator:
 
         # Define the color map
         if self.difference:
-            color_map = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightgoldenrodyellow", "purple",
-                                                                                 "midnightblue"])
+            if self.bidirectional:
+                color_map = 'Spectral_r'
+            else:
+                color_map = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightgoldenrodyellow", "purple",
+                                                                                "midnightblue"])
+
         else:
             color_map = 'YlGnBu'
 
@@ -226,14 +296,28 @@ class HeatmapGenerator:
             im = ax.imshow(pubs, cmap=color_map, vmin=0, vmax=1, aspect=1)
 
         # Set tick marks and labels for the x-axis
-        ax.set_xticks([i for i in range(0, (self.tRNA_max_length - 1), TICK_STEP)],
-                      labels=[i + 1 for i in range(0, (self.tRNA_max_length - 1), TICK_STEP)])
+        # Set font size and alignment for x-axis tick labels
+        if self.structure_file:
+            ax.set_xticks(range(self.tRNA_max_length))
+            ax.set_xticklabels(yeast_structure_xticks[:self.tRNA_max_length])
+            plt.setp(ax.get_xticklabels(), fontsize=X_TICK_FONT_SIZE, ha="center", va="center", rotation_mode="anchor",
+                     rotation=90)
+
+            # Overlay for None values
+            for (i, j), val in np.ndenumerate(pubs):
+                if np.isnan(val):
+                    # Calculate the center y-coordinate of the cell
+                    y_center = i
+                    x_center = j
+                    # Draw a dot in the middle of the cell
+                    ax.scatter(x_center, y_center, color='black', s=0.1, marker='o')  # 's' is the size of the dot
+        else:
+            ax.set_xticks([i for i in range(0, (self.tRNA_max_length - 1), TICK_STEP)],
+                          labels=[i + 1 for i in range(0, (self.tRNA_max_length - 1), TICK_STEP)])
+            plt.setp(ax.get_xticklabels(), fontsize=X_TICK_FONT_SIZE, ha="center", rotation_mode="anchor")
 
         # Set tick marks and labels for the y-axis
         ax.set_yticks(np.arange(len(noT_labels)), labels=noT_labels)
-
-        # Set font size and alignment for x-axis tick labels
-        plt.setp(ax.get_xticklabels(), fontsize=X_TICK_FONT_SIZE, ha="center", rotation_mode="anchor")
 
         # Set font size for y-axis tick labels
         plt.setp(ax.get_yticklabels(), fontsize=Y_TICK_FONT_SIZE)
@@ -257,7 +341,8 @@ class HeatmapGenerator:
 def main():
     parser = argparse.ArgumentParser(description="This code creates a heatmap of posterior probabilities along tRNA "
                                                  "isoacceptors sequenced with Nanopore. The input files must be "
-                                                 "generated with marginCaller (see https://github.com/benedictpaten/marginAlign-tRNA) "
+                                                 "generated with marginCaller (see "
+                                                 "https://github.com/benedictpaten/marginAlign-tRNA)"
                                                  "using the setting --threshold=0 so that every position is output.")
     parser.add_argument("-i", "--input", nargs='+', required=True, metavar="INPUT",
                         help="One or two input pileup .vcf files generated with marginCaller. If --difference is used, "
@@ -276,6 +361,9 @@ def main():
     parser.add_argument("-b", "--bidirectional", required=False, action="store_true",
                         help="Produces difference plot with directionality maintained (cbar normalized from [-0.5, "
                              "0.5]).")
+    parser.add_argument("-s", "--structure", required=False, type=str, help="Path to a tab separated file containing "
+                                                                            "the name of each tRNA and the respective "
+                                                                            "coordinates of their variable positions.")
     parser.add_argument("-r", "--resolution", default=300, required=False, type=int,
                         help="Resolution of final image in dpi.")
 
@@ -298,8 +386,9 @@ def main():
 
         # Process the first input file
         heatmap_generator = HeatmapGenerator(input_file1, args.output, args.lengths, args.adaptors, args.title,
-                                             args.resolution, args.difference, args.bidirectional)
+                                             args.resolution, args.difference, args.bidirectional, args.structure)
         heatmap_generator.load_lengths()
+        heatmap_generator.load_structure()
         heatmap_generator.import_data()
 
         noT_labels = [heatmap_generator.TtoU(i) for i in heatmap_generator.clean_labels]
@@ -308,8 +397,10 @@ def main():
 
         # Process the second input file
         second_heatmap_generator = HeatmapGenerator(input_file2, args.output, args.lengths, args.adaptors,
-                                                    args.title, args.resolution, args.difference, args.bidirectional)
+                                                    args.title, args.resolution, args.difference, args.bidirectional,
+                                                    args.structure)
         second_heatmap_generator.load_lengths()
+        heatmap_generator.load_structure()
         second_heatmap_generator.import_data()
 
         # Get posterior probability matrix for the second file
@@ -323,8 +414,9 @@ def main():
     else:
         # Process the input file without calculating the difference
         heatmap_generator = HeatmapGenerator(input_file1, args.output, args.lengths, args.adaptors, args.title,
-                                             args.resolution, args.difference, args.bidirectional)
+                                             args.resolution, args.difference, args.bidirectional, args.structure)
         heatmap_generator.load_lengths()
+        heatmap_generator.load_structure()
         heatmap_generator.import_data()
 
         noT_labels = [heatmap_generator.TtoU(i) for i in heatmap_generator.clean_labels]
