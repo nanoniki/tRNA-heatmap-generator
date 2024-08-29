@@ -33,7 +33,7 @@ Regular heatmap
 
 Difference heatmap
 
-    python tRNAheatmap.py -i WT-IVT_c0.vcf pus4-IVT_c0.vcf -o yeast_pus4d-WT_heatmap.png -l tRNA_lengths.txt -a 18,6 -t "pus4d - WT" -d
+    python tRNAheatmap.py -i WT-IVT_c0.vcf pus4-IVT_c0.vcf -o yeast_pus4d-WT_heatmap.png -l tRNA_lengths.txt -s variable_loop.txt -a 18,6 -t "pus4d - WT" -d
 
 
 ## Requirements
