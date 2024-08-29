@@ -12,8 +12,10 @@ from matplotlib.patches import Rectangle
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import MultipleLocator
+
 plt.rcParams['pdf.fonttype'] = 42
 plt.switch_backend('agg')
+
 
 class HeatmapGenerator:
     def __init__(self, input_file, output_file, lengths_file, adaptors, title, resolution, difference, bidirectional,
@@ -55,7 +57,7 @@ class HeatmapGenerator:
 
         # Update the maximum length attribute
         if self.structure_file:
-            self.tRNA_max_length = max_length_adjusted + 4  # +4 to account for -1, 20a, 20b, etc
+            self.tRNA_max_length = max_length_adjusted + 3
         else:
             self.tRNA_max_length = max_length_adjusted
 
@@ -68,7 +70,10 @@ class HeatmapGenerator:
         self.tRNA_labels = [tRNA for tRNA, length in self.tRNA_lengths.items() if length > 0]
 
         for name in self.tRNA_labels:
-            self.clean_labels.append(name.split("-")[1])
+            if 'Tyr-GTA' in name:
+                self.clean_labels.append(name.split("-")[1]+name.split("-")[2])
+            else:
+                self.clean_labels.append(name.split("-")[1])
 
         # Update the tRNA count based on the filtered tRNA labels
         self.tRNA_count = len(self.tRNA_labels)
@@ -80,8 +85,9 @@ class HeatmapGenerator:
             next(f)
             for line in f:
                 tRNA = line.strip().split('\t')[0]
+                if 'Tyr' in tRNA:
+                    tRNA = "Saccharomyces_cerevisiae_tRNA-Tyr-GTA-1-1"
                 v_loop = int(line.strip().split('\t')[-1])
-
                 elements = line.strip().split('\t')[1:-1]
                 other_v = []
                 for e in elements:
@@ -91,8 +97,6 @@ class HeatmapGenerator:
                 coordinates = other_v + [v_loop]
 
                 self.tRNA_structure[tRNA] = coordinates
-
-        # print('\n'.join(f'{k}: {v}' for k, v in self.tRNA_structure.items()))
 
     def UtoT(self, trna):
         """This function takes a tRNA sequence as input and replaces 'U' nucleotides in the anticodon
@@ -106,6 +110,8 @@ class HeatmapGenerator:
             else:
                 anticodon = trna[-7:].split('-')[0]
                 if 'iMet' in trna:
+                    translated_ac = trna[:len(trna) - 7] + anticodon.replace("U", "T") + trna[-4:]
+                elif 'Tyr' in trna:
                     translated_ac = trna[:len(trna) - 7] + anticodon.replace("U", "T") + trna[-4:]
                 else:
                     translated_ac = trna[:len(trna) - 7] + '-' + anticodon.replace("U", "T") + trna[-4:]
@@ -207,10 +213,14 @@ class HeatmapGenerator:
         posterior_prob = np.zeros((self.tRNA_count, self.tRNA_max_length))
 
         # Fill in posterior probability matrix with data from pp_dict
+
         for i, tRNA in enumerate(self.tRNA_labels):
             posteriors = pp_dict[tRNA]
 
+            # print(i, tRNA, self.tRNA_structure.keys())
             nan_tuples = self.tRNA_structure[tRNA][:-1]
+            # print(tRNA, nan_tuples)
+
             for coord, count in nan_tuples:
                 # print(tRNA, coord, count)
                 nan_values = [np.nan for _ in range(count)]
@@ -218,8 +228,12 @@ class HeatmapGenerator:
                 # posteriors.insert(coord, (np.nan * count))
 
             tRNA_len_noA = pos_dict[tRNA][-1] + len(self.tRNA_structure[tRNA][:-1])  # tRNA length no adaptor
-            var_loop_len = abs(self.tRNA_max_length - tRNA_len_noA) - (sum(y for _, y in nan_tuples) - len(nan_tuples))
-
+            tmp_vll = abs(self.tRNA_max_length - tRNA_len_noA) - (sum(y for _, y in nan_tuples) - len(nan_tuples))
+            if tmp_vll < 0:
+                var_loop_len = 0
+            else:
+                var_loop_len = abs(self.tRNA_max_length - tRNA_len_noA) - (
+                            sum(y for _, y in nan_tuples) - len(nan_tuples))
             var_loop_start = (self.tRNA_structure[tRNA][-1] - self.adaptors[0] - 1)  # variable loop start position
 
             # Check for errors in data length
@@ -227,8 +241,9 @@ class HeatmapGenerator:
                 print('Error: The length of', tRNA, 'is longer than max length given. You may not have filtered out '
                                                     'secondary and/or supplementary alignments.')
                 # check TyrGTA GluCTC or iMet labels and dictionary keys
-                print(tRNA, len(posteriors))
-                print(posteriors)
+                print('tRNA, length:', tRNA, len(posteriors))
+                print('posteriors:', posteriors)
+                print('max length:', self.tRNA_max_length)
 
             elif len(posteriors) < self.tRNA_max_length:
 
@@ -263,14 +278,18 @@ class HeatmapGenerator:
         TITLE_FONT_SIZE = 10  # Font size for the plot title
         LABEL_FONT_SIZE = 6  # Font size for axis labels
         COLOR_BAR_FONT_SIZE = 6  # Font size for color bar labels
-        COLOR_BAR_LABEL = 'Reference match probability'  # Label for the color bar
 
-        yeast_structure_xticks = ['-1 ', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
-                            '16', '17', '18', '19', '20', '20a ', '20b ', '21', '22', '23', '24', '25', '26', '27',
-                            '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42',
-                            '43', '44', '45', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', '46', '47',
-                            '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62',
-                            '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76']
+        if self.difference:
+            COLOR_BAR_LABEL = 'Change in reference match probability'  # Label for the color bar
+        else:
+            COLOR_BAR_LABEL = 'Reference match probability'  # Label for the color bar
+
+        yeast_structure_xticks = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14',
+                                  '15', '16', '17', '18', '19', '20', '20a ', '20b ', '21', '22', '23', '24', '25', '26',
+                                  '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41',
+                                  '42', '43', '44', '45', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', 'v', '46',
+                                  '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61',
+                                  '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76']
 
         # Convert centimeters to inches
         cm = 1 / 2.54
@@ -284,10 +303,12 @@ class HeatmapGenerator:
                 color_map = 'Spectral_r'
             else:
                 color_map = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightgoldenrodyellow", "purple",
-                                                                                "midnightblue"])
-
+                                                                                     "midnightblue"])
         else:
-            color_map = 'YlGnBu'
+            if self.bidirectional:
+                color_map = 'Spectral_r'
+            else:
+                color_map = 'YlGnBu'
 
         # Plot the heatmap
         if self.bidirectional:
@@ -309,8 +330,14 @@ class HeatmapGenerator:
                     # Calculate the center y-coordinate of the cell
                     y_center = i
                     x_center = j
-                    # Draw a dot in the middle of the cell
-                    ax.scatter(x_center, y_center, color='black', s=0.1, marker='o')  # 's' is the size of the dot
+                    # Select the marker based on the row index
+                    marker_clr = 'black'
+
+                    # Draw a dot in the middle of the cell only if marker_clr is not None
+                    if marker_clr is not None:
+                        ax.scatter(x_center, y_center, color=marker_clr, s=0.1,
+                                   marker='o')  # 's' is the size of the dot
+
         else:
             ax.set_xticks([i for i in range(0, (self.tRNA_max_length - 1), TICK_STEP)],
                           labels=[i + 1 for i in range(0, (self.tRNA_max_length - 1), TICK_STEP)])
@@ -402,6 +429,9 @@ def main():
         second_heatmap_generator.load_lengths()
         heatmap_generator.load_structure()
         second_heatmap_generator.import_data()
+
+        # Call load_structure() first to ensure the structure is loaded or refreshed
+        second_heatmap_generator.load_structure()
 
         # Get posterior probability matrix for the second file
         _, second_posterior_prob = second_heatmap_generator.structure_data()
