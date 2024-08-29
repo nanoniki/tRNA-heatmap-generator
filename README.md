@@ -2,7 +2,7 @@
 ## Overview
 This Python script generates a heatmap of posterior probabilities along tRNA isoacceptors sequenced with Nanopore technology. It takes input files generated with marginCaller and produces a graphical representation of the posterior probabilities for each tRNA isoacceptor.
 
-![alt text](https://github.com/nanoniki/tRNA-heatmap-generator/blob/3b54229c7a584f8ca9c219e83efef83af0704f2e/Examples/WT_structure_example.png)
+![alt text](https://github.com/nanoniki/tRNA-heatmap-generator/blob/main/Examples/WT_structure_example.png)
 
 ## Features
 - Supports single or paired input files for comparison.
