@@ -1,0 +1,43 @@
+tRNA    (position, count)   variable_loop_start_pos
+Saccharomyces_cerevisiae_chrIV_trna3-AlaAGC	(4, 2)	(28, 12)	67
+Saccharomyces_cerevisiae_chrI_trna2-AlaTGC	(4, 2)	(28, 12)	67
+Saccharomyces_cerevisiae_chrIV_trna26-ArgACG	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrXII_trna10-ArgCCG	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrX_trna10-ArgCCT	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrII_trna8-ArgTCT	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrIII_trna2-AsnGTT	(21, 1)	(49, 12)	67
+Saccharomyces_cerevisiae_chrII_trna9-AspGTC	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrII_trna11-CysGCA	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrXIII_trna8-GlnCTG	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrIII_trna6-GlnTTG	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_tRNA-GluCTC-1-2	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrII_trna10-GluTTC	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrXV_trna16-GlyCCC	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrII_trna13-GlyGCC	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrVII_trna16-GlyTCC	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrV_trna15-HisGTG	(21, 1)	(49, 12)	67
+Saccharomyces_cerevisiae_chrII_trna3-IleAAT	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrIV_trna9-IleTAT	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrVII_trna7-LeuCAA	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrVII_trna11-LeuGAG	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrII_trna1-LeuTAA	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrX_trna12-LeuTAG	(20, 2)	(29, 1)	(48, 2)	(55, 1)	67
+Saccharomyces_cerevisiae_chrIII_trna7-LysCTT	(20, 2)	(29, 1)	(48, 2)	(55, 1)	67
+Saccharomyces_cerevisiae_chrVII_trna1-LysTTT	(20, 2)	(29, 1)	(48, 2)	(55, 1)	67
+Saccharomyces_cerevisiae_tRNA-iMet-CAT-1-4	(20, 2)	(29, 1)	(48, 2)	(55, 1)	67
+Saccharomyces_cerevisiae_chrIV_trna12-MetCAT	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrVI_trna9-PheGAA	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrIII_trna9-ProAGG	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrVI_trna1-ProTGG	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrI_trna4-SerAGA	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrIII_trna4-SerCGA	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrVI_trna7-SerGCT	(17, 1)	(23, 2)	(48, 12)	67
+Saccharomyces_cerevisiae_chrIX_trna4-SerTGA	(21, 1)	(49, 12)	66
+Saccharomyces_cerevisiae_chrII_trna5-ThrAGT	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrXI_trna16-ThrCGT	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrVII_trna10-ThrTGT	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrVII_trna33-TrpCCA	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_tRNA-Tyr-GTA-1-1	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrV_trna8-ValAAC	(21, 1)	(49, 12)	67
+Saccharomyces_cerevisiae_chrIV_trna20-ValCAC	(17, 1)	(23, 1)	(48, 12)	67
+Saccharomyces_cerevisiae_chrII_trna12-ValTAC	(17, 1)	(23, 1)	(48, 12)	67
