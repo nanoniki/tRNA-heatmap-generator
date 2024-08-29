@@ -217,15 +217,11 @@ class HeatmapGenerator:
         for i, tRNA in enumerate(self.tRNA_labels):
             posteriors = pp_dict[tRNA]
 
-            # print(i, tRNA, self.tRNA_structure.keys())
             nan_tuples = self.tRNA_structure[tRNA][:-1]
-            # print(tRNA, nan_tuples)
 
             for coord, count in nan_tuples:
-                # print(tRNA, coord, count)
                 nan_values = [np.nan for _ in range(count)]
                 posteriors[coord:coord] = nan_values
-                # posteriors.insert(coord, (np.nan * count))
 
             tRNA_len_noA = pos_dict[tRNA][-1] + len(self.tRNA_structure[tRNA][:-1])  # tRNA length no adaptor
             tmp_vll = abs(self.tRNA_max_length - tRNA_len_noA) - (sum(y for _, y in nan_tuples) - len(nan_tuples))
