@@ -13,7 +13,7 @@ This Python script generates a heatmap of posterior probabilities along tRNA iso
 
 ## Usage
 ### Input Files
-The input files should be generated with marginCaller using the --threshold=0 setting to ensure that every position is output. Though not required, we recommend using marginAlign EM training with synthetic or IVT data as your error model for the most accurate results. If you're comparing two files to calculate the difference, ensure that they have the same format and positional information.
+The input files should be generated with marginCaller using the --threshold=0 setting to ensure that every position is in the output. Though not required, we recommend using marginAlign EM training with synthetic or IVT data as your error model for the most accurate results. If you're comparing two files to calculate the difference, ensure that they have the same format and positional information.
 
 ### Command-Line Arguments
     -i, --input: One or two input pileup .vcf files generated with marginCaller. If --difference is used, provide two files.
