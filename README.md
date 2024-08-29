@@ -19,6 +19,7 @@ The input files should be generated with marginCaller using the --threshold=0 se
     -i, --input: One or two input pileup .vcf files generated with marginCaller. If --difference is used, provide two files.
     -o, --output: Path to the output location with the desired file extension (e.g., heatmap.png).
     -l, --lengths: Path to a tab-separated file containing the name of each tRNA and their respective lengths with adaptors. The naming conventions used for tRNA in this file will appear as y-axis labels.
+    -s, --structure: Path to a tab separated file containing the name of each tRNA and the respective coordinates of their variable positions.
     -a, --adaptors: The lengths of your 5' and 3' adaptors separated by a comma (e.g., 5,3).
     -t, --title: Title of the plot. Default is no title.
     -d, --difference: Calculate the difference between two input files (second input - first input).
@@ -29,11 +30,11 @@ The input files should be generated with marginCaller using the --threshold=0 se
 
 Regular heatmap
 
-    python tRNAheatmap.py -i WT-IVT_c0.vcf -o yeast_wildtype_heatmap.png -l tRNA_lengths.txt -s variable_loop.txt -a 18,6 -t "Wildtype"
+    python tRNAheatmap.py -i WT-IVT_c0.vcf -o yeast_wildtype_heatmap.png -l tRNA_lengths.txt -s variable.txt -a 18,6 -t "Wildtype"
 
 Difference heatmap
 
-    python tRNAheatmap.py -i WT-IVT_c0.vcf pus4-IVT_c0.vcf -o yeast_pus4d-WT_heatmap.png -l tRNA_lengths.txt -s variable_loop.txt -a 18,6 -t "pus4d - WT" -d
+    python tRNAheatmap.py -i WT-IVT_c0.vcf pus4-IVT_c0.vcf -o yeast_pus4d-WT_heatmap.png -l tRNA_lengths.txt -s variable.txt -a 18,6 -t "pus4d - WT" -d
 
 
 ## Requirements
