@@ -29,7 +29,7 @@ The input files should be generated with marginCaller using the --threshold=0 se
 
 Regular heatmap
 
-    python tRNAheatmap.py -i WT-IVT_c0.vcf -o yeast_wildtype_heatmap.png -l tRNA_lengths.txt -a 18,6 -t "Wildtype"
+    python tRNAheatmap.py -i WT-IVT_c0.vcf -o yeast_wildtype_heatmap.png -l tRNA_lengths.txt -s variable_loop.txt -a 18,6 -t "Wildtype"
 
 Difference heatmap
 
