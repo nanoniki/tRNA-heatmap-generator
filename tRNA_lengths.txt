@@ -36,7 +36,7 @@ Saccharomyces_cerevisiae_chrII_trna5-ThrAGT	100
 Saccharomyces_cerevisiae_chrXI_trna16-ThrCGT	99
 Saccharomyces_cerevisiae_chrVII_trna10-ThrTGT	99
 Saccharomyces_cerevisiae_chrVII_trna33-TrpCCA	99
-Saccharomyces_cerevisiae_tRNA-TyrGTA-1-1	102
+Saccharomyces_cerevisiae_tRNA-Tyr-GTA-1-1	102
 Saccharomyces_cerevisiae_chrV_trna8-ValAAC	101
 Saccharomyces_cerevisiae_chrIV_trna20-ValCAC	100
 Saccharomyces_cerevisiae_chrII_trna12-ValTAC	101
